@@ -1,0 +1,106 @@
+-- A. Retrieve all records from the Olympics table.
+use olympic;
+SELECT * FROM olympics_data;
+
+-- B. Retrieve only the Athlete names and the Medals they won 
+use olympic;
+SELECT name, medal FROM olympics_data;
+
+-- C. Count the total number of athletes in the dataset. 
+use olympic;
+SELECT COUNT(DISTINCT name) AS total_athletes FROM olympics_data;
+
+-- D. Find all records of athletes who won a Gold medal
+use olympic;
+SELECT * FROM olympics_data WHERE medal = 'Gold';
+
+-- E. List all athletes who won Silver, ordered by the Year they won it.
+use olympic;
+SELECT name, year FROM olympics_data WHERE medal = 'Silver' ORDER BY year;
+
+-- F. Count how many Gold, Silver, and Bronze medals each country has won. 
+use olympic;
+SELECT team, 
+       COUNT(CASE WHEN medal = 'Gold' THEN 1 END) AS gold_count,
+       COUNT(CASE WHEN medal = 'Silver' THEN 1 END) AS silver_count,
+       COUNT(CASE WHEN medal = 'Bronze' THEN 1 END) AS bronze_count
+FROM olympics_data
+GROUP BY team;
+
+-- G. Identify countries that have won more than 50 Gold medals.
+use olympic;
+SELECT team FROM (
+    SELECT team, COUNT(*) AS gold_count 
+    FROM olympics_data WHERE medal = 'Gold' 
+    GROUP BY team
+) AS gold_counts
+WHERE gold_count > 50;
+
+
+
+-- I. Find the athlete who has won the most medals
+use olympic;
+SELECT name, COUNT(*) AS total_medals
+FROM olympics_data
+GROUP BY name
+ORDER BY total_medals DESC
+LIMIT 1;
+
+-- J. List all events that include the term 'Freestyle' in their name 
+use olympic;
+SELECT DISTINCT event FROM olympics_data WHERE event LIKE '%Freestyle%';
+
+-- K. Find the top 3 athletes by the total number of medals won in each sport.
+use olympic; 
+SELECT sport, name, COUNT(*) AS total_medals
+FROM olympics_data
+GROUP BY sport, name
+ORDER BY total_medals DESC
+LIMIT 3;
+
+-- L. List athletes who won more than one medal in a single Olympic year. 
+use olympic;
+SELECT name, year, COUNT(*) AS total_medals
+FROM olympics_data
+GROUP BY name, year
+HAVING COUNT(*) > 1;
+
+-- M. Identify countries that have won gold medals in both Summer and Winter Olympics 
+use olympic;
+SELECT team
+FROM olympics_data
+GROUP BY team
+HAVING COUNT(DISTINCT season) > 1 AND MAX(medal) = 'Gold';
+
+-- N. Show the year difference between the first and last medal won by each country. 
+use olympic;
+SELECT team, MAX(year) - MIN(year) AS year_difference
+FROM olympics_data
+GROUP BY team;
+
+-- O. Calculate the average number of medals won per athlete for each country.
+use olympic; 
+SELECT team, COUNT(*) / COUNT(DISTINCT name) AS avg_medals_per_athlete
+FROM olympics_data
+GROUP BY team;
+
+-- P. Identify athletes who have won a silver medal and then later won a gold in the same event. 
+use olympic;
+SELECT o1.name, o1.event
+FROM olympics_data o1
+JOIN olympics_data o2 ON o1.name = o2.name AND o1.event = o2.event
+WHERE o1.medal = 'Silver' AND o2.medal = 'Gold' AND o1.year < o2.year;
+
+
+
+
+-- S. List countries that have won medals in more than 10 different sports.
+use olympic; 
+SELECT team
+FROM (
+    SELECT team, COUNT(DISTINCT sport) AS sports_count
+    FROM olympics_data
+    GROUP BY team
+) AS sports_counts
+WHERE sports_count > 10;
+
